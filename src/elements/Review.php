@@ -1,0 +1,492 @@
+<?php
+/**
+ * Reviews plugin for Craft CMS 3.x
+ *
+ * product and store reviews
+ *
+ * @link      https://kurious.agency
+ * @copyright Copyright (c) 2019 Kurious Agency
+ */
+
+namespace kuriousagency\reviews\elements;
+
+use kuriousagency\reviews\Reviews;
+use kuriousagency\reviews\records\Review as ReviewRecord;
+use kuriousagency\reviews\elements\db\ReviewQuery;
+
+use Craft;
+use craft\base\Element;
+use craft\elements\db\ElementQuery;
+use craft\elements\db\ElementQueryInterface;
+use craft\commerce\Plugin as Commerce;
+use craft\commerce\elements\Order;
+use craft\commerce\elements\Product;
+use craft\helpers\ArrayHelper;
+use craft\helpers\DateTimeHelper;
+use craft\helpers\ElementHelper;
+use craft\helpers\UrlHelper;
+use craft\validators\DateTimeValidator;
+
+/**
+ * @author    Kurious Agency
+ * @package   Reviews
+ * @since     0.0.1
+ */
+class Review extends Element
+{
+	// Constants
+    // =========================================================================
+
+    const STATUS_ENABLED = 'enabled';
+    const STATUS_DISABLED = 'disabled';
+	
+	// Public Properties
+    // =========================================================================
+
+    /**
+     * @var string
+     */
+	public $feedback;
+	public $reply;
+	public $rating;
+	public $customerId;
+	public $productId;
+	public $enabled;
+	public $orderId;
+
+	private $_email;
+	private $_firstName;
+	private $_lastName;
+
+    // Static Methods
+    // =========================================================================
+
+    /**
+     * @inheritdoc
+     */
+    public static function displayName(): string
+    {
+        return Craft::t('reviews', '');
+	}
+	
+	/*public function __toString()
+    {
+        return $this->rating;
+    }*/
+
+    /**
+     * @inheritdoc
+     */
+    public static function hasContent(): bool
+    {
+        return false;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public static function hasTitles(): bool
+    {
+        return false;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public static function isLocalized(): bool
+    {
+        return false;
+	}
+	
+	public static function hasStatuses(): bool
+	{
+		return true;
+	}
+
+	public static function statuses(): array
+	{
+		return [
+			self::STATUS_ENABLED => Craft::t('reviews', 'Enabled'),
+            self::STATUS_DISABLED => Craft::t('reviews', 'Disabled'),
+		];
+	}
+
+	public function getStatus()
+	{
+		//$status = parent::getStatus();
+
+		if ($this->enabled) {
+			return self::STATUS_ENABLED;
+		}
+
+		return self::STATUS_DISABLED;
+	}
+
+	/*public static function eagerLoadingMap(array $sourceElements, string $handle)
+    {
+        if ($handle == 'variants') {
+            $sourceElementIds = ArrayHelper::getColumn($sourceElements, 'id');
+
+            $map = (new Query())
+                ->select('productId as source, id as target')
+                ->from(['{{%commerce_variants}}'])
+                ->where(['in', 'productId', $sourceElementIds])
+                ->orderBy('sortOrder asc')
+                ->all();
+
+            return [
+                'elementType' => Variant::class,
+                'map' => $map
+            ];
+        }
+
+        return parent::eagerLoadingMap($sourceElements, $handle);
+    }
+
+    
+    public static function prepElementQueryForTableAttribute(ElementQueryInterface $elementQuery, string $attribute)
+    {
+        
+        if ($attribute === 'variants') {
+            $with = $elementQuery->with ?: [];
+            $with[] = 'variants';
+            $elementQuery->with = $with;
+        } else {
+            parent::prepElementQueryForTableAttribute($elementQuery, $attribute);
+        }
+	}*/
+
+    /**
+     * @inheritdoc
+     */
+    public static function find(): ElementQueryInterface
+    {
+        return new ReviewQuery(static::class);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected static function defineSources(string $context = null): array
+    {
+        $sources = [
+			'*' => [
+                'key' => '*',
+                'label' => Craft::t('reviews', 'All Reviews'),
+			],
+			'Product' => [
+                'key' => 'product',
+				'label' => Craft::t('reviews', 'Product Reviews'),
+				'criteria' => ['productId' => ':notempty:'],
+			],
+			'General' => [
+                'key' => 'general',
+				'label' => Craft::t('reviews', 'General Reviews'),
+				'criteria' => ['productId' => ':empty:'],
+            ]
+		];
+
+        return $sources;
+	}
+	
+	protected static function defineActions(string $source = null): array
+	{
+		$actions = [];
+
+		return $actions;
+	}
+
+	protected static function defineSortOptions(): array
+	{
+		return [
+			'rating' => Craft::t('reviews', 'Rating'),
+			'email' => Craft::t('reviews', 'Email'),
+			//'product' => ['label' => Craft::t('reviews', 'Product'), 'attribute' => 'product.title'],
+			'firstName' => Craft::t('reviews', 'Firstname'),
+			'lastName' => Craft::t('reviews', 'Lastname'),
+			'dateCreated' => Craft::t('reviews', 'Date Created'),
+		];
+	}
+
+	protected static function defineTableAttributes(): array
+    {
+		return [
+			'id' => ['label' => Craft::t('reviews', 'ID')],
+			'rating' => ['label' => Craft::t('reviews', 'Rating')],
+			'email' => ['label' => Craft::t('reviews', 'Email')],
+			'firstName' => ['label' => Craft::t('reviews', 'Firstname')],
+			'lastName' => ['label' => Craft::t('reviews', 'Lastname')],
+			'email' => ['label' => Craft::t('reviews', 'Email')],
+			'product' => ['label' => Craft::t('reviews', 'Product')],
+			'order' => ['label' => Craft::t('reviews', 'Order')],
+			'dateCreated' => ['label' => Craft::t('reviews', 'Date Created')],
+			'dateUpdated' => ['label' => Craft::t('reviews', 'Date Updated')],
+		];
+	}
+
+	protected static function defineDefaultTableAttributes(string $source): array
+    {
+		return [
+			'id',
+			'rating',
+			'email',
+			'product',
+			'dateCreated',
+		];
+	}
+
+	protected static function defineSearchableAttributes(): array
+    {
+		return [
+			'rating',
+			'email',
+			'firstName',
+			'lastName',
+			'dateCreated',
+			'product',
+			'order'
+		];
+	}
+
+	public function getSearchKeywords(string $attribute): string
+    {
+        switch ($attribute) {
+            case 'product':
+                return $this->product->title ?? '';
+            case 'order':
+                return $this->order->reference ?? '';
+            default:
+                return parent::getSearchKeywords($attribute);
+        }
+    }
+
+	protected function tableAttributeHtml(string $attribute): string
+    {
+		switch ($attribute) {
+			case 'rating':
+				{
+					$stars = '';
+					for ($i=0; $i < $this->rating; $i++) { 
+						$stars .= '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#F2DC31" viewBox="0 0 24 24" stroke="none">
+										<path id="mod040reviewStar" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+									</svg>';
+					}
+					return $stars;
+				}
+			case 'product':
+				{
+					if (!$this->productId) {
+						return '';
+					}
+					return '<a href="'.$this->product->cpEditUrl.'"><span class="status '.$this->product->status.'"></span>'.$this->product->title.'</a>';
+				}
+			case 'order':
+				{
+					if (!$this->orderId) {
+						return '';
+					}
+					return '<a href="'.$this->order->cpEditUrl.'"><span class="status '.$this->order->status.'"></span>'.$this->order->reference.'</a>';
+				}
+			default:
+                {
+                    return parent::tableAttributeHtml($attribute);
+                }
+		}
+	}
+
+    // Public Methods
+    // =========================================================================
+
+    /**
+     * @inheritdoc
+     */
+    public function rules()
+    {
+		return [
+			[['rating', 'customerId', 'productId', 'orderId'], 'number', 'integerOnly' => true],
+			[['enabled'], 'boolean'],
+			['enabled', 'default', 'value' => false],
+			[['feedback', 'email'], 'required'],
+        ];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getIsEditable(): bool
+    {
+        return true;
+	}
+
+	public function getCpEditUrl(): string
+    {
+        return UrlHelper::cpUrl('reviews/' . $this->id);
+    }
+	
+	public function getCustomer()
+	{
+		if (!$this->customerId) {
+			return null;
+		}
+		return Commerce::getInstance()->getCustomers()->getCustomerById($this->customerId);
+	}
+
+	public function getOrder()
+	{
+		if (!$this->orderId) {
+			return null;
+		}
+		return Commerce::getInstance()->getOrders()->getOrderById($this->orderId);
+	}
+
+	public function getProduct()
+	{
+		if (!$this->productId) {
+			return null;
+		}
+		return Commerce::getInstance()->getProducts()->getProductById($this->productId);
+	}
+
+	public function getVerifiedBuyer(): bool
+	{
+		return $this->orderId ? true : false;
+	}
+
+
+	public function getEmail(): string
+	{
+		if ($this->getCustomer() && $this->getCustomer()->getUser()) {
+			$this->setEmail($this->getCustomer()->getUser()->email);
+		}
+
+		return $this->_email ?? '';
+	}
+
+	public function setEmail($value)
+    {
+        $this->_email = $value;
+	}
+	
+	public function getFirstName(): string
+	{
+		if ($this->getCustomer() && $this->getCustomer()->getUser()) {
+			$this->setFirstName($this->getCustomer()->getUser()->firstName);
+		} elseif ($this->getOrder()) {
+			$this->setFirstName($this->getOrder()->billingAddress->firstName);
+		}
+
+		return $this->_firstName ?? '';
+	}
+
+	public function setFirstName($value)
+    {
+        $this->_firstName = $value;
+	}
+	
+	public function getLastName(): string
+	{
+		if ($this->getCustomer() && $this->getCustomer()->getUser()) {
+			$this->setLastName($this->getCustomer()->getUser()->lastName);
+		} elseif ($this->getOrder()) {
+			$this->setFirstName($this->getOrder()->billingAddress->lastName);
+		}
+
+		return $this->_lastName ?? '';
+	}
+
+	public function setLastName($value)
+    {
+        $this->_lastName = $value;
+    }
+
+
+
+    // Indexes, etc.
+    // -------------------------------------------------------------------------
+
+    /**
+     * @inheritdoc
+     */
+    /*public function getEditorHtml(): string
+    {
+        $html = Craft::$app->getView()->renderTemplateMacro('_includes/forms', 'textField', [
+            [
+                'label' => Craft::t('app', 'Title'),
+                'siteId' => $this->siteId,
+                'id' => 'title',
+                'name' => 'title',
+                'value' => $this->title,
+                'errors' => $this->getErrors('title'),
+                'first' => true,
+                'autofocus' => true,
+                'required' => true
+            ]
+        ]);
+
+        $html .= parent::getEditorHtml();
+
+        return $html;
+    }*/
+
+    // Events
+    // -------------------------------------------------------------------------
+
+    /**
+     * @inheritdoc
+     */
+    public function beforeSave(bool $isNew): bool
+    {
+        return true;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function afterSave(bool $isNew)
+    {
+		if (!$isNew) {
+            $record = ReviewRecord::findOne($this->id);
+
+            if (!$record) {
+                throw new Exception('Invalid review ID: ' . $this->id);
+            }
+        } else {
+            $record = new ReviewRecord();
+            $record->id = $this->id;
+		}
+		
+		$record->feedback = $this->feedback;
+		$record->reply = $this->reply;
+		$record->rating = $this->rating;
+		$record->customerId = $this->customerId;
+		$record->productId = $this->productId;
+		$record->orderId = $this->orderId;
+		$record->email = $this->getEmail();
+		$record->firstName = $this->getFirstName();
+		$record->lastName = $this->getLastName();
+		$record->enabled = $this->enabled;
+
+		$record->save();
+
+		$this->id = $record->id;
+
+		return parent::afterSave($isNew);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function beforeDelete(): bool
+    {
+        return true;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function afterDelete()
+    {
+    }
+
+
+}

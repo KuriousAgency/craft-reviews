@@ -1,0 +1,26 @@
+{# @var craft \craft\web\twig\variables\CraftVariable #}
+{#
+/**
+ * Reviews plugin for Craft CMS
+ *
+ * ProductReviews Field Settings
+ *
+ * @author    Kurious Agency
+ * @copyright Copyright (c) 2019 Kurious Agency
+ * @link      https://kurious.agency
+ * @package   Reviews
+ * @since     0.0.1
+ */
+#}
+
+{% import "_includes/forms" as forms %}
+
+{% do view.registerAssetBundle("kuriousagency\\reviews\\assetbundles\\reviews\\ReviewsAsset") %}
+
+{{ forms.textField({
+    label: 'Some Attribute',
+    instructions: 'Enter some attribute here.',
+    id: 'someAttribute',
+    name: 'someAttribute',
+    value: field['someAttribute']})
+}}

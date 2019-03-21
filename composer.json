@@ -1,0 +1,40 @@
+{
+	"name": "kuriousagency/reviews",
+	"description": "product and store reviews",
+	"type": "craft-plugin",
+	"version": "0.0.1",
+	"keywords": [
+		"craft",
+		"cms",
+		"craftcms",
+		"craft-plugin",
+		"reviews"
+	],
+	"support": {
+		"docs": "https://github.com/KuriousAgency/reviews/blob/master/README.md",
+		"issues": "https://github.com/KuriousAgency/reviews/issues"
+	},
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "Kurious Agency",
+			"homepage": "https://kurious.agency"
+		}
+	],
+	"require": {
+		"craftcms/cms": "^3.0.0-RC1"
+	},
+	"autoload": {
+		"psr-4": {
+			"kuriousagency\\reviews\\": "src/"
+		}
+	},
+	"extra": {
+		"name": "Reviews",
+		"handle": "reviews",
+		"hasCpSettings": false,
+		"hasCpSection": true,
+		"changelogUrl": "https://raw.githubusercontent.com/KuriousAgency/reviews/master/CHANGELOG.md",
+		"class": "kuriousagency\\reviews\\Reviews"
+	}
+}

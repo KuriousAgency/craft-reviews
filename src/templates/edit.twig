@@ -1,0 +1,142 @@
+{# @var craft \craft\web\twig\variables\CraftVariable #}
+{#
+/**
+ * Reviews plugin for Craft CMS 3.x
+ *
+ * Reviews index.twig
+ *
+ * @author    Kurious Agency
+ * @copyright Copyright (c) 2019 Kurious Agency
+ * @link      https://kurious.agency
+ * @package   Reviews
+ * @since     0.0.1
+ */
+#}
+
+{% extends "_layouts/cp" %}
+{% import "_includes/forms" as forms %}
+
+{% set title = "Reviews: "|t('reviews')~ review.id %}
+
+{% set fullPageForm = true %}
+{% set saveShortcutRedirect = 'reviews' %}
+
+
+{% block content %}
+	<input type="hidden" name="action" value="reviews/default/save">
+	{% if review.id %}
+		<input type="hidden" name="reviewId" value="{{ review.id }}">
+	{% endif %}
+	{{ redirectInput('reviews') }}
+	{{ csrfInput() }}
+
+	{{ forms.textareaField({
+		label: "Feedback"|t('reviews'),
+		id: 'feedback',
+		name: 'feedback',
+		value: review.feedback,
+		rows: 5,
+		errors: review.getErrors('feedback'),
+		required: true
+	}) }}
+
+	{{ forms.textareaField({
+		label: "Reply"|t('reviews'),
+		id: 'reply',
+		name: 'reply',
+		value: review.reply,
+		rows: 5,
+		errors: review.getErrors('reply'),
+	}) }}
+	
+	{{ forms.selectField({
+		label: "Rating"|t('reviews'),
+		name: 'rating',
+		value: review.rating,
+		options: [
+			{label:5, value:5},
+			{label:4, value:4},
+			{label:3, value:3},
+			{label:2, value:2},
+			{label:1, value:1},
+		],
+		errors: review.getErrors('rating'),
+		required: true,
+	}) }}
+{% endblock %}
+
+{% block details %}
+<div class="meta">
+
+	{{ forms.dateTimeField({
+        label: 'Date Created'|t('reviews'),
+        id: 'dateCreated',
+        name: 'dateCreated',
+        value: review.dateCreated,
+        errors: review.getErrors('dateCreated')
+    }) }}
+
+    {{ forms.dateTimeField({
+        label: 'Date Updated'|t('reviews'),
+        id: 'dateUpdated',
+        name: 'dateUpdated',
+        value: review.dateUpdated,
+        errors: review.getErrors('dateUpdated')
+    }) }}
+
+    {{ forms.lightswitchField({
+        label: "Enabled"|t('reviews'),
+        id: 'enabled',
+        name: 'enabled',
+        on: review.enabled
+    }) }}
+
+	{{ forms.elementSelectField({
+        id: 'productId',
+        label: 'Product',
+        name: 'productId',
+        elementType: 'craft\\commerce\\elements\\Product',
+        elements: [review.product] ?? null,
+        limit: 1,
+        instructions: 'Choose a product to review'
+    }) }}
+
+	{{ forms.elementSelectField({
+        id: 'orderId',
+        label: 'Order',
+        name: 'orderId',
+        elementType: 'craft\\commerce\\elements\\Order',
+        elements: [review.order] ?? null,
+        limit: 1,
+        instructions: 'Choose an order'
+    }) }}
+
+	{{ forms.textField({
+		label: "Email"|t('reviews'),
+		id: 'email',
+		name: 'email',
+		value: review.email ? review.email : currentUser.email,
+		errors: review.getErrors('email'),
+		readonly: review.customerId ? true : false,
+		required: true,
+	}) }}
+	{{ forms.textField({
+		label: "Firstname"|t('reviews'),
+		id: 'firstName',
+		name: 'firstName',
+		value: review.firstName ? review.firstName : currentUser.firstName,
+		errors: review.getErrors('firstName'),
+		readonly: review.customerId ? true : false,
+		required: true,
+	}) }}
+	{{ forms.textField({
+		label: "Lastname"|t('reviews'),
+		id: 'lastName',
+		name: 'lastName',
+		value: review.lastName ? review.lastName : currentUser.lastName,
+		errors: review.getErrors('lastName'),
+		readonly: review.customerId ? true : false,
+		required: true,
+	}) }}
+</div>
+{% endblock %}
