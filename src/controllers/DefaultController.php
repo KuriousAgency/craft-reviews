@@ -118,9 +118,7 @@ class DefaultController extends Controller
                 'review' => $review
 			]);
 			
-			Craft::dd($review->getErrors());
-
-            return null;
+			return null;
 		}
 
 		Craft::$app->getSession()->setNotice(Craft::t('reviews', 'Review saved.'));
