@@ -96,7 +96,7 @@ class DefaultController extends Controller
 			if ($user = Craft::$app->getUser()->getIdentity()) {
 				$customer = Commerce::getInstance()->getCustomers()->getCustomerByUserId($user->id);
 				$review->customerId = $customer->id;
-			} else if ($user = Craft::$app->getUsers()->getUserByUsernameOrEmail($$review->email)) {
+			} else if ($user = Craft::$app->getUsers()->getUserByUsernameOrEmail($review->email)) {
 				$customer = Commerce::getInstance()->getCustomers()->getCustomerByUserId($user->id);
 				$review->customerId = $customer->id;
 			}
