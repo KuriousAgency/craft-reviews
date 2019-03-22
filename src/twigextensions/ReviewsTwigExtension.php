@@ -61,6 +61,10 @@ class ReviewsTwigExtension extends \Twig_Extension
 			$ratings[] = $review->rating;
 		}
 
+		if (!count($ratings)) {
+			return null;
+		}
+
 		$average = array_sum($ratings)/count($ratings);
 
 		if ($halfRounding) {
