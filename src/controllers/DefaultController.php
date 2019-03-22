@@ -13,6 +13,8 @@ namespace kuriousagency\reviews\controllers;
 use kuriousagency\reviews\Reviews;
 use kuriousagency\reviews\elements\Review;
 
+use craft\commerce\Plugin as Commerce;
+
 use Craft;
 use craft\web\Controller;
 use yii\base\Exception;
@@ -89,6 +91,16 @@ class DefaultController extends Controller
 		$review->customerId = $request->getBodyParam('customerId', $review->customerId);
 		$review->productId = $request->getBodyParam('productId', $review->productId);
 		$review->orderId = $request->getBodyParam('orderId', $review->orderId);
+
+		if (!$review->customerId) {
+			if ($user = Craft::$app->getUser()->getIdentity()) {
+				$customer = Commerce::getInstance()->getCustomers()->getCustomerByUserId($user->id);
+				$review->customerId = $customer->id;
+			} else if ($user = Craft::$app->getUsers()->getUserByUsernameOrEmail($$review->email)) {
+				$customer = Commerce::getInstance()->getCustomers()->getCustomerByUserId($user->id);
+				$review->customerId = $customer->id;
+			}
+		}
 
 		if (is_array($review->productId)) {
 			$review->productId = $review->productId[0];
