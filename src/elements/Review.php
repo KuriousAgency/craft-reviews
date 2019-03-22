@@ -13,6 +13,9 @@ namespace kuriousagency\reviews\elements;
 use kuriousagency\reviews\Reviews;
 use kuriousagency\reviews\records\Review as ReviewRecord;
 use kuriousagency\reviews\elements\db\ReviewQuery;
+use kuriousagency\reviews\elements\actions\DeleteReview;
+use kuriousagency\reviews\elements\actions\EnableReview;
+use kuriousagency\reviews\elements\actions\DisableReview;
 
 use Craft;
 use craft\base\Element;
@@ -192,6 +195,16 @@ class Review extends Element
 	protected static function defineActions(string $source = null): array
 	{
 		$actions = [];
+
+		$actions[] = EnableReview::class;
+		$actions[] = DisableReview::class;
+
+		$deleteAction = Craft::$app->getElements()->createAction([
+			'type' => DeleteReview::class,
+			'confirmationMessage' => Craft::t('reviews', 'Are you sure you want to delete the selected reviews?'),
+			'successMessage' => Craft::t('reviews', 'Reviews deleted.'),
+		]);
+		$actions[] = $deleteAction;
 
 		return $actions;
 	}
