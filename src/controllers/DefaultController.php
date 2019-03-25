@@ -63,6 +63,52 @@ class DefaultController extends Controller
 			'review' => $review,
 		]);
 	}
+
+	public function actionSubmit()
+	{
+		$this->requirePostRequest();
+
+		$request = Craft::$app->getRequest();
+
+		$number = $request->getRequiredBodyParam('orderNumber');
+		$order = Commerce::getInstance()->getOrders()->getOrderByNumber($number);
+
+		$reviews = $request->getRequiredBodyParam('reviews');
+		$errors = [];
+		$models = [];
+
+		foreach ($reviews as $review)
+		{
+			$newReview = new Review();
+			$newReview->feedback = $review['feedback'];
+			$newReview->rating = $review['rating'];
+			$newReview->customerId = $order->customer->id;
+			$newReview->productId = $review['productId'];
+			$newReview->orderId = $order->id;
+
+			$models[] = $newReview;
+
+			if (!$newReview->validate()) {
+				$errors[] = $newReview->getErrors();
+			}
+		}
+
+		if (count($errors)) {
+			Craft::$app->getUrlManager()->setRouteParams([
+                'reviews' => $models
+			]);
+
+			return null;
+		}
+
+		foreach ($models as $review)
+		{
+			Craft::$app->getElements()->saveElement($review, false);
+		}
+
+		return $this->redirectToPostedUrl($order);
+
+	}
 	
 	public function actionSave()
 	{
