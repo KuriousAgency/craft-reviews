@@ -38,7 +38,7 @@ class DefaultController extends Controller
      *         The actions must be in 'kebab-case'
      * @access protected
      */
-    protected $allowAnonymous = ['save'];
+    protected $allowAnonymous = ['save', 'submit'];
 
     // Public Methods
     // =========================================================================
