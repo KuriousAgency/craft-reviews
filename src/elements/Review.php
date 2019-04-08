@@ -175,17 +175,20 @@ class Review extends Element
         $sources = [
 			'*' => [
                 'key' => '*',
-                'label' => Craft::t('reviews', 'All Reviews'),
+				'label' => Craft::t('reviews', 'All Reviews'),
+				'defaultSort' => ['dateCreated', 'desc'],
 			],
 			'Product' => [
                 'key' => 'product',
 				'label' => Craft::t('reviews', 'Product Reviews'),
 				'criteria' => ['productId' => ':notempty:'],
+				'defaultSort' => ['dateCreated', 'desc'],
 			],
 			'General' => [
                 'key' => 'general',
 				'label' => Craft::t('reviews', 'General Reviews'),
 				'criteria' => ['productId' => ':empty:'],
+				'defaultSort' => ['dateCreated', 'desc'],
             ]
 		];
 
@@ -212,12 +215,12 @@ class Review extends Element
 	protected static function defineSortOptions(): array
 	{
 		return [
+			'dateCreated' => Craft::t('reviews', 'Date Created'),
 			'rating' => Craft::t('reviews', 'Rating'),
 			'email' => Craft::t('reviews', 'Email'),
 			//'product' => ['label' => Craft::t('reviews', 'Product'), 'attribute' => 'product.title'],
 			'firstName' => Craft::t('reviews', 'Firstname'),
-			'lastName' => Craft::t('reviews', 'Lastname'),
-			'dateCreated' => Craft::t('reviews', 'Date Created'),
+			'lastName' => Craft::t('reviews', 'Lastname'),	
 		];
 	}
 
