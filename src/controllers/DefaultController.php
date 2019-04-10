@@ -138,7 +138,7 @@ class DefaultController extends Controller
 		$review->productId = $request->getBodyParam('productId', $review->productId);
 		$review->orderId = $request->getBodyParam('orderId', $review->orderId);
 
-		if (!$review->customerId) {
+		if (!$review->customerId && $request->isSiteRequest) {
 			if ($user = Craft::$app->getUser()->getIdentity()) {
 				$customer = Commerce::getInstance()->getCustomers()->getCustomerByUserId($user->id);
 				$review->customerId = $customer->id;
