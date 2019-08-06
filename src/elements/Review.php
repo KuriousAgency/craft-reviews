@@ -404,7 +404,7 @@ class Review extends Element
 		if ($this->getCustomer() && $this->getCustomer()->getUser()) {
 			$this->setLastName($this->getCustomer()->getUser()->lastName);
 		} elseif ($this->getOrder()) {
-			$this->setFirstName($this->getOrder()->billingAddress->lastName);
+			$this->setLastName($this->getOrder()->billingAddress->lastName);
 		}
 
 		return $this->_lastName ?? '';
