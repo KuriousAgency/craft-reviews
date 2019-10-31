@@ -72,10 +72,10 @@ class Review extends Element
         return Craft::t('reviews', '');
 	}
 	
-	/*public function __toString()
+	public function __toString()
     {
-        return $this->rating;
-    }*/
+        return substr($this->feedback, 0, 25) . (strlen($this->feedback) > 25 ? '...' : '');
+    }
 
     /**
      * @inheritdoc
@@ -227,7 +227,7 @@ class Review extends Element
 	protected static function defineTableAttributes(): array
     {
 		return [
-			'id' => ['label' => Craft::t('reviews', 'ID')],
+			'feedback' => ['label' => Craft::t('reviews', 'Feedback')],
 			'rating' => ['label' => Craft::t('reviews', 'Rating')],
 			'email' => ['label' => Craft::t('reviews', 'Email')],
 			'firstName' => ['label' => Craft::t('reviews', 'Firstname')],
@@ -235,6 +235,7 @@ class Review extends Element
 			'email' => ['label' => Craft::t('reviews', 'Email')],
 			'product' => ['label' => Craft::t('reviews', 'Product')],
 			'order' => ['label' => Craft::t('reviews', 'Order')],
+			'reply' => ['label' => Craft::t('reviews', 'Replied?')],
 			'dateCreated' => ['label' => Craft::t('reviews', 'Date Created')],
 			'dateUpdated' => ['label' => Craft::t('reviews', 'Date Updated')],
 		];
@@ -243,7 +244,7 @@ class Review extends Element
 	protected static function defineDefaultTableAttributes(string $source): array
     {
 		return [
-			'id',
+			'feedback',
 			'rating',
 			'email',
 			'product',
@@ -260,7 +261,9 @@ class Review extends Element
 			'lastName',
 			'dateCreated',
 			'product',
-			'order'
+			'order',
+			'feedback',
+			'reply'
 		];
 	}
 
@@ -302,6 +305,10 @@ class Review extends Element
 						return '';
 					}
 					return '<a href="'.$this->order->cpEditUrl.'"><span class="status '.$this->order->status.'"></span>'.$this->order->reference.'</a>';
+				}
+			case 'reply':
+				{
+					return $this->reply ? '<span data-icon="check" title="Yes"></span>' : '';
 				}
 			default:
                 {
