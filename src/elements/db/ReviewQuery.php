@@ -19,6 +19,7 @@ use craft\db\QueryAbortedException;
 use craft\elements\db\ElementQuery;
 use craft\commerce\Plugin as Commerce;
 use craft\elements\User;
+use craft\elements\Category;
 use craft\commerce\elements\Product;
 use craft\commerce\elements\Order;
 use craft\helpers\ArrayHelper;
@@ -42,6 +43,8 @@ class ReviewQuery extends ElementQuery
 	public $customerId;
 	
 	public $productId;
+
+	public $categoryId;
 
 	public $orderId;
 
@@ -106,6 +109,12 @@ class ReviewQuery extends ElementQuery
 	public function productId($value = null)
 	{
 		$this->productId = $value;
+		return $this;
+	}
+
+	public function categoryId($value = null)
+	{
+		$this->categoryId = $value;
 		return $this;
 	}
 
@@ -183,6 +192,22 @@ class ReviewQuery extends ElementQuery
 		return $this;
 	}
 
+	public function category($value)
+	{
+		$categoryIds = [];
+		if ($value instanceof Category) {
+			$category = Craft::$app->getCategories()->getCategoryById($value->id);
+			$categoryIds[] = $category->id ?? null;
+		} else if ($value !== null) {
+			$category = Craft::$app->getCategories()->getCategoryById($value);
+			$categoryIds[] = $category->id ?? null;
+		} else {
+			$categoryIds[] = null;
+		}
+		$this->categoryId = $categoryIds;
+		return $this;
+	}
+
 
 
     // Protected Methods
@@ -203,6 +228,7 @@ class ReviewQuery extends ElementQuery
 			'reviews.rating',
 			'reviews.customerId',
 			'reviews.productId',
+			'reviews.categoryId',
 			'reviews.orderId',
 			'reviews.email',
 			'reviews.firstName',
@@ -246,6 +272,10 @@ class ReviewQuery extends ElementQuery
 		
 		if ($this->productId) {
             $this->subQuery->andWhere(Db::parseParam('reviews.productId', $this->productId));
+		}
+
+		if ($this->categoryId) {
+			$this->subQuery->andWhere(Db::parseParam('reviews.categoryId', $this->categoryId));
 		}
 		
 		if ($this->orderId) {

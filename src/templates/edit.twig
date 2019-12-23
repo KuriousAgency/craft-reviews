@@ -125,6 +125,17 @@
     }) }}
 
 	{{ forms.elementSelectField({
+        id: 'categoryId',
+        label: 'Category',
+        name: 'categoryId',
+        elementType: 'craft\\elements\\Category',
+        elements: [review.category] ?? null,
+		sources: ['group:' ~ craft.categories.group('products').one.group.uid],
+        limit: 1,
+        instructions: 'Choose a product to review'
+    }) }}
+
+	{{ forms.elementSelectField({
         id: 'orderId',
         label: 'Order',
         name: 'orderId',

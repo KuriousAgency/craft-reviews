@@ -14,6 +14,7 @@ use kuriousagency\reviews\Reviews;
 use kuriousagency\reviews\elements\Review;
 
 use craft\commerce\Plugin as Commerce;
+use craft\commerce\elements\Product;
 
 use Craft;
 use craft\web\Controller;
@@ -155,7 +156,16 @@ class DefaultController extends Controller
 			$review->orderId = $review->orderId[0];
 		}
 
-		//Craft::dd($review);
+		if ($review->productId) {
+			$product = Product::find()->id($review->productId)->one();
+            if ($product && $product->productCategories) {
+                $categories = $product->productCategories->all();
+                $categoryId = end($categories)->id;
+                $review->categoryId = $categoryId;
+            }
+		}
+
+		// Craft::dd($review);
 
 		if (!Craft::$app->getElements()->saveElement($review)) {
 			Craft::$app->getSession()->setError(Craft::t('reviews', 'Couldn’t save review.'));

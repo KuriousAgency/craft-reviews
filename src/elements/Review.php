@@ -54,6 +54,7 @@ class Review extends Element
 	public $rating;
 	public $customerId;
 	public $productId;
+	public $categoryId;
 	public $enabled;
 	public $orderId;
 
@@ -184,6 +185,12 @@ class Review extends Element
 				'criteria' => ['productId' => ':notempty:'],
 				'defaultSort' => ['dateCreated', 'desc'],
 			],
+			// 'Category' => [
+			// 	'key' => 'category',
+			// 	'label' => Craft::t('reviews', 'Product Category Reviews'),
+			// 	'criteria' => ['categoryId' => ':notempty:'],
+			// 	'defaultSort' => ['dateCreated', 'desc'],
+			// ],
 			'General' => [
                 'key' => 'general',
 				'label' => Craft::t('reviews', 'General Reviews'),
@@ -234,6 +241,7 @@ class Review extends Element
 			'lastName' => ['label' => Craft::t('reviews', 'Lastname')],
 			'email' => ['label' => Craft::t('reviews', 'Email')],
 			'product' => ['label' => Craft::t('reviews', 'Product')],
+			'category' => ['label' => Craft::t('reviews', 'Product Category')],
 			'order' => ['label' => Craft::t('reviews', 'Order')],
 			'reply' => ['label' => Craft::t('reviews', 'Replied?')],
 			'dateCreated' => ['label' => Craft::t('reviews', 'Date Created')],
@@ -247,6 +255,7 @@ class Review extends Element
 			'feedback',
 			'rating',
 			'email',
+			'category',
 			'product',
 			'dateCreated',
 		];
@@ -261,6 +270,7 @@ class Review extends Element
 			'lastName',
 			'dateCreated',
 			'product',
+			'category',
 			'order',
 			'feedback',
 			'reply'
@@ -271,7 +281,9 @@ class Review extends Element
     {
         switch ($attribute) {
             case 'product':
-                return $this->product->title ?? '';
+				return $this->product->title ?? '';
+			case 'category':
+				return $this->category->title ?? '';
             case 'order':
                 return $this->order->reference ?? '';
             default:
@@ -298,6 +310,13 @@ class Review extends Element
 						return '';
 					}
 					return '<a href="'.$this->product->cpEditUrl.'"><span class="status '.$this->product->status.'"></span>'.$this->product->title.'</a>';
+				}
+			case 'category':
+				{
+					if (!$this->categoryId) {
+						return '';
+					}
+					return '<a href="'.$this->category->cpEditUrl.'"><span class="status '.$this->category->status.'"></span>'.$this->category->title.'</a>';
 				}
 			case 'order':
 				{
@@ -326,7 +345,7 @@ class Review extends Element
     public function rules()
     {
 		return [
-			[['rating', 'customerId', 'productId', 'orderId'], 'number', 'integerOnly' => true],
+			[['rating', 'customerId', 'productId', 'categoryId', 'orderId'], 'number', 'integerOnly' => true],
 			[['enabled'], 'boolean'],
 			['enabled', 'default', 'value' => false],
 			[['feedback', 'email'], 'required'],
@@ -368,6 +387,14 @@ class Review extends Element
 			return null;
 		}
 		return Commerce::getInstance()->getProducts()->getProductById($this->productId);
+	}
+
+	public function getCategory()
+	{
+		if (!$this->categoryId) {
+			return null;
+		}
+		return Craft::$app->getCategories()->getCategoryById($this->categoryId);
 	}
 
 	public function getVerifiedBuyer(): bool
@@ -483,6 +510,7 @@ class Review extends Element
 		$record->rating = $this->rating;
 		$record->customerId = $this->customerId;
 		$record->productId = $this->productId;
+		$record->categoryId = $this->categoryId;
 		$record->orderId = $this->orderId;
 		$record->email = $this->getEmail();
 		$record->firstName = $this->getFirstName();
