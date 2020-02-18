@@ -113,16 +113,17 @@
         name: 'enabled',
         on: review.enabled
     }) }}
-
-	{{ forms.elementSelectField({
-        id: 'productId',
-        label: 'Product',
-        name: 'productId',
-        elementType: 'craft\\commerce\\elements\\Product',
-        elements: [review.product] ?? null,
-        limit: 1,
-        instructions: 'Choose a product to review'
-    }) }}
+	{% if review.purchasableType %}
+		{{ forms.elementSelectField({
+			id: 'purchasableId',
+			label: 'Product',
+			name: 'purchasableId',
+			elementType: review.purchasableType,
+			elements: [review.getPurchasable()] ?? null,
+			limit: 1,
+			instructions: 'Choose a product to review'
+		}) }}
+	{% endif %}
 
 	{{ forms.elementSelectField({
         id: 'orderId',

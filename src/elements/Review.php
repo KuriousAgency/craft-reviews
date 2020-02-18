@@ -53,7 +53,8 @@ class Review extends Element
 	public $reply;
 	public $rating;
 	public $customerId;
-	public $productId;
+	public $purchasableId;
+	public $purchasableType;
 	public $enabled;
 	public $orderId;
 
@@ -178,19 +179,25 @@ class Review extends Element
 				'label' => Craft::t('reviews', 'All Reviews'),
 				'defaultSort' => ['dateCreated', 'desc'],
 			],
-			'Product' => [
-                'key' => 'product',
-				'label' => Craft::t('reviews', 'Product Reviews'),
-				'criteria' => ['productId' => ':notempty:'],
-				'defaultSort' => ['dateCreated', 'desc'],
-			],
 			'General' => [
                 'key' => 'general',
 				'label' => Craft::t('reviews', 'General Reviews'),
-				'criteria' => ['productId' => ':empty:'],
+				'criteria' => ['purchasableId' => ':empty:'],
 				'defaultSort' => ['dateCreated', 'desc'],
             ]
 		];
+
+        $allPurchasables = Commerce::getInstance()->getPurchasables()->getAllPurchasableElementTypes();
+ 
+ 		foreach ($allPurchasables as $purchasable) {
+            $instance = new $purchasable;
+			$sources[$instance->displayName()] = [
+				'key' => $purchasable,
+				'label' => Craft::t('reviews', $instance->displayName() . ' Reviews'),
+				'criteria' => ['purchasableType' => $purchasable],
+				'defaultSort' => ['dateCreated', 'desc']
+			];
+        }
 
         return $sources;
 	}
@@ -233,7 +240,8 @@ class Review extends Element
 			'firstName' => ['label' => Craft::t('reviews', 'Firstname')],
 			'lastName' => ['label' => Craft::t('reviews', 'Lastname')],
 			'email' => ['label' => Craft::t('reviews', 'Email')],
-			'product' => ['label' => Craft::t('reviews', 'Product')],
+			'purchasable' => ['label' => Craft::t('reviews', 'Purchasable')],
+			'purchasableType' => ['label' => Craft::t('reviews', 'PurchasableType')],
 			'order' => ['label' => Craft::t('reviews', 'Order')],
 			'reply' => ['label' => Craft::t('reviews', 'Replied?')],
 			'dateCreated' => ['label' => Craft::t('reviews', 'Date Created')],
@@ -247,7 +255,7 @@ class Review extends Element
 			'feedback',
 			'rating',
 			'email',
-			'product',
+			'purchasable',
 			'dateCreated',
 		];
 	}
@@ -260,7 +268,7 @@ class Review extends Element
 			'firstName',
 			'lastName',
 			'dateCreated',
-			'product',
+			'purchasable',
 			'order',
 			'feedback',
 			'reply'
@@ -270,8 +278,8 @@ class Review extends Element
 	public function getSearchKeywords(string $attribute): string
     {
         switch ($attribute) {
-            case 'product':
-                return $this->product->title ?? '';
+            case 'purchasable':
+                return $this->purchasable->title ?? '';
             case 'order':
                 return $this->order->reference ?? '';
             default:
@@ -292,12 +300,12 @@ class Review extends Element
 					}
 					return $stars;
 				}
-			case 'product':
+			case 'purchasable':
 				{
-					if (!$this->productId) {
+					if (!$this->purchasableId) {
 						return '';
 					}
-					return '<a href="'.$this->product->cpEditUrl.'"><span class="status '.$this->product->status.'"></span>'.$this->product->title.'</a>';
+					return '<a href="'.$this->purchasable->cpEditUrl.'"><span class="status '.$this->purchasable->status.'"></span>'.$this->purchasable->description.'</a>';
 				}
 			case 'order':
 				{
@@ -326,7 +334,7 @@ class Review extends Element
     public function rules()
     {
 		return [
-			[['rating', 'customerId', 'productId', 'orderId'], 'number', 'integerOnly' => true],
+			[['rating', 'customerId', 'purchasableId', 'orderId'], 'number', 'integerOnly' => true],
 			[['enabled'], 'boolean'],
 			['enabled', 'default', 'value' => false],
 			[['feedback', 'email'], 'required'],
@@ -362,12 +370,12 @@ class Review extends Element
 		return Commerce::getInstance()->getOrders()->getOrderById($this->orderId);
 	}
 
-	public function getProduct()
+	public function getPurchasable()
 	{
-		if (!$this->productId) {
+		if (!$this->purchasableId) {
 			return null;
 		}
-		return Commerce::getInstance()->getProducts()->getProductById($this->productId);
+		return Commerce::getInstance()->getPurchasables()->getPurchasableById($this->purchasableId);
 	}
 
 	public function getVerifiedBuyer(): bool
@@ -482,13 +490,14 @@ class Review extends Element
 		$record->reply = $this->reply;
 		$record->rating = $this->rating;
 		$record->customerId = $this->customerId;
-		$record->productId = $this->productId;
+		$record->purchasableId = $this->purchasableId;
+		$record->purchasableType = $this->purchasableType;
 		$record->orderId = $this->orderId;
 		$record->email = $this->getEmail();
 		$record->firstName = $this->getFirstName();
 		$record->lastName = $this->getLastName();
 		$record->enabled = $this->enabled;
-
+// Craft::dd($record);
 		$record->save();
 
 		$this->id = $record->id;

@@ -2,7 +2,7 @@
 	"name": "kuriousagency/reviews",
 	"description": "product and store reviews",
 	"type": "craft-plugin",
-	"version": "0.0.17",
+	"version": "1.0.0",
 	"keywords": [
 		"craft",
 		"cms",

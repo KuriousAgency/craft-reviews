@@ -18,6 +18,7 @@ use craft\db\Query;
 use craft\db\QueryAbortedException;
 use craft\elements\db\ElementQuery;
 use craft\commerce\Plugin as Commerce;
+use craft\commerce\base\Purchasable;
 use craft\elements\User;
 use craft\commerce\elements\Product;
 use craft\commerce\elements\Order;
@@ -41,7 +42,9 @@ class ReviewQuery extends ElementQuery
 
 	public $customerId;
 	
-	public $productId;
+	public $purchasableId;
+
+	public $purchasableType;
 
 	public $orderId;
 
@@ -103,9 +106,15 @@ class ReviewQuery extends ElementQuery
 		return $this;
 	}
 
-	public function productId($value = null)
+	public function purchasableId($value = null)
 	{
-		$this->productId = $value;
+		$this->purchasableId = $value;
+		return $this;
+	}
+
+	public function purchasableType($value = null)
+	{
+		$this->purchasableType = $value;
 		return $this;
 	}
 
@@ -153,20 +162,21 @@ class ReviewQuery extends ElementQuery
         return $this;
 	}
 	
-	public function product($value)
-	{
-		if ($value instanceof Product) {
-			$product = Commerce::getInstance()->getProducts()->getProductById($value->id);
-			$this->productId = $product->id ?? null;
-		} else if ($value !== null) {
-			$product = Commerce::getInstance()->getProducts()->getProductById($value);
-			$this->productId = $product->id ?? null;
-		} else {
-			$this->productId = null;
-		}
+	// public function purchasable($value)
+	// {
+	// 	if ($value instanceof Purchasable) {
+	// 		$purchasable = Commerce::getInstance()->getPurchasables()->getPurchasableById($value->id);
+	// 		$this->purchasableId = $purchasable->id ?? null;
+	// 	} else if ($value !== null) {
+	// 		$purchasable = Commerce::getInstance()->getPurchasables()->getPurchasableById($value);
+	// 		$this->purchasableId = $purchasable->id ?? null;
+	// 	} else {
+	// 		$this->purchasableId = null;
+	// 	}
 
-		return $this;
-	}
+	// 	return $this;
+	// }
+
 
 	public function commerceOrder($value)
 	{
@@ -202,7 +212,8 @@ class ReviewQuery extends ElementQuery
 			'reviews.reply',
 			'reviews.rating',
 			'reviews.customerId',
-			'reviews.productId',
+			'reviews.purchasableId',
+			'reviews.purchasableType',
 			'reviews.orderId',
 			'reviews.email',
 			'reviews.firstName',
@@ -244,8 +255,12 @@ class ReviewQuery extends ElementQuery
             $this->subQuery->andWhere(Db::parseParam('reviews.customerId', $this->customerId));
 		}
 		
-		if ($this->productId) {
-            $this->subQuery->andWhere(Db::parseParam('reviews.productId', $this->productId));
+		if ($this->purchasableId) {
+            $this->subQuery->andWhere(Db::parseParam('reviews.purchasableId', $this->purchasableId));
+		}
+
+		if ($this->purchasableType) {
+			$this->subQuery->andWhere(Db::parseParam('reviews.purchasableType', $this->purchasableType));
 		}
 		
 		if ($this->orderId) {

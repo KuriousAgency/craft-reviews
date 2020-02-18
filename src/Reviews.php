@@ -56,7 +56,7 @@ class Reviews extends Plugin
     /**
      * @var string
      */
-	public $schemaVersion = '0.0.1';
+	public $schemaVersion = '0.0.2';
 	
 	public $hasCpSection = true;
 
@@ -82,7 +82,8 @@ class Reviews extends Plugin
             UrlManager::EVENT_REGISTER_CP_URL_RULES,
             function (RegisterUrlRulesEvent $event) {
 				$event->rules['reviews'] = 'reviews/default/index';
-				$event->rules['reviews/new'] = 'reviews/default/edit';
+                $event->rules['reviews/new'] = 'reviews/default/edit';
+                $event->rules['reviews/new/<purchasableType:[-\w]+>'] = 'reviews/default/edit';
 				$event->rules['reviews/<id:\d+>'] = 'reviews/default/edit';
             }
         );

@@ -48,7 +48,7 @@ class DefaultController extends Controller
 		return $this->renderTemplate('reviews/index');
 	}
 
-	public function actionEdit(int $id = null): Response
+	public function actionEdit(int $id = null, string $purchasableType = null): Response
 	{
 		if ($id) {
 			$review = Reviews::$plugin->service->getReviewById($id);
@@ -57,6 +57,9 @@ class DefaultController extends Controller
 			}
 		} else {
 			$review = new Review();
+			if ($purchasableType) {
+				$review->purchasableType = str_replace('-','\\',$purchasableType);
+			}
 		}
 
 		return $this->renderTemplate('reviews/edit', [
@@ -83,7 +86,13 @@ class DefaultController extends Controller
 			$newReview->feedback = $review['feedback'];
 			$newReview->rating = $review['rating'];
 			$newReview->customerId = $order->customer->id;
-			$newReview->productId = $review['productId'];
+			$newReview->purchasableId = $review['purchasableId'];
+			// Now that purchasableId is finished being set lets get the type
+			if ($newReview->purchasableId) {
+				$newReview->purchasableType = get_class(Commerce::getInstance()->getPurchasables()->getPurchasableById($review->purchasableId));
+			}
+			$newReview->purchasableType = get_class(Commerce::getInstance()->getPurchasables()->getPurchasableById($review->purchasableId));
+
 			$newReview->orderId = $order->id;
 
 			$models[] = $newReview;
@@ -135,7 +144,7 @@ class DefaultController extends Controller
 		$review->lastName = $request->getBodyParam('lastName', $review->lastName);
 		$review->enabled = $request->getBodyParam('enabled', $review->enabled);
 		$review->customerId = $request->getBodyParam('customerId', $review->customerId);
-		$review->productId = $request->getBodyParam('productId', $review->productId);
+		$review->purchasableId = $request->getBodyParam('purchasableId', $review->purchasableId);
 		$review->orderId = $request->getBodyParam('orderId', $review->orderId);
 
 		if (!$review->customerId && $request->isSiteRequest) {
@@ -148,14 +157,18 @@ class DefaultController extends Controller
 			}
 		}
 
-		if (is_array($review->productId)) {
-			$review->productId = $review->productId[0];
+		if (is_array($review->purchasableId)) {
+			$review->purchasableId = $review->purchasableId[0];
 		}
 		if (is_array($review->orderId)) {
 			$review->orderId = $review->orderId[0];
 		}
 
-		//Craft::dd($review);
+		// Now that purchasableId is finished being set lets get the type
+		if ($review->purchasableId) {
+			$review->purchasableType = get_class(Commerce::getInstance()->getPurchasables()->getPurchasableById($review->purchasableId));
+		}
+		// Craft::dd($review);
 
 		if (!Craft::$app->getElements()->saveElement($review)) {
 			Craft::$app->getSession()->setError(Craft::t('reviews', 'Couldn’t save review.'));

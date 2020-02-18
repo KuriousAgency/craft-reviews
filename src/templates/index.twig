@@ -21,8 +21,17 @@
 {% set elementType = 'kuriousagency\\reviews\\elements\\Review' %}
 
 {% block actionButton %}
-    <div class="buttons">
-        <a href="{{ url('reviews/new') }}"
-           class="btn submit add icon">{{ 'New review'|t('reviews') }}</a>
+<div class="btngroup">
+    <a type="submit" class="btn submit add icon" href="{{ url('reviews/new') }}">New General Review</a>
+    <div class="btn submit menubtn"></div>
+    <div class="menu">
+        <ul>
+            {% for source in sources[2:] %}
+                <li>
+                    <a class="" href="{{ url('reviews/new/' ~ source.key|replace('\\','-'))|lower }}">New {{ source.label|trim('s','right') }}</a>
+                </li>
+            {% endfor %}                    
+        </ul>
     </div>
+</div>
 {% endblock %}
