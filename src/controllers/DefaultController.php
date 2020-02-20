@@ -58,7 +58,11 @@ class DefaultController extends Controller
 		} else {
 			$review = new Review();
 			if ($purchasableType) {
-				$review->purchasableType = str_replace('-','\\',$purchasableType);
+				$arr = explode('-',$purchasableType);
+				$lastString = ucfirst(array_pop($arr));
+				array_push($arr,$lastString);
+				$review->purchasableType = implode('\\',$arr);
+				Craft::dd($review->purchasableType);
 			}
 		}
 
