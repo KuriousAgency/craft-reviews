@@ -62,7 +62,6 @@ class DefaultController extends Controller
 				$lastString = ucfirst(array_pop($arr));
 				array_push($arr,$lastString);
 				$review->purchasableType = implode('\\',$arr);
-				Craft::dd($review->purchasableType);
 			}
 		}
 
