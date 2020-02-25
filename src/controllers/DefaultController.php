@@ -92,9 +92,9 @@ class DefaultController extends Controller
 			$newReview->purchasableId = $review['purchasableId'];
 			// Now that purchasableId is finished being set lets get the type
 			if ($newReview->purchasableId) {
-				$newReview->purchasableType = get_class(Commerce::getInstance()->getPurchasables()->getPurchasableById($review->purchasableId));
+				$newReview->purchasableType = get_class(Commerce::getInstance()->getPurchasables()->getPurchasableById($newReview->purchasableId));
 			}
-			$newReview->purchasableType = get_class(Commerce::getInstance()->getPurchasables()->getPurchasableById($review->purchasableId));
+			// $newReview->purchasableType = get_class(Commerce::getInstance()->getPurchasables()->getPurchasableById($review->purchasableId));
 
 			$newReview->orderId = $order->id;
 
