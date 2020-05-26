@@ -12,7 +12,7 @@ namespace kuriousagency\reviews;
 
 use kuriousagency\reviews\services\ReviewsService as Service;
 use kuriousagency\reviews\variables\ReviewsVariable;
-use kuriousagency\reviews\fields\ProductReviews as ProductReviewsField;
+use kuriousagency\reviews\fields\Reviews as ReviewsField;
 use kuriousagency\reviews\widgets\ReviewsWidget;
 use kuriousagency\reviews\elements\Review;
 use kuriousagency\reviews\twigextensions\ReviewsTwigExtension;
@@ -96,13 +96,13 @@ class Reviews extends Plugin
             }
         );
 
-        /*Event::on(
+        Event::on(
             Fields::class,
             Fields::EVENT_REGISTER_FIELD_TYPES,
             function (RegisterComponentTypesEvent $event) {
-                $event->types[] = ProductReviewsField::class;
+                $event->types[] = ReviewsField::class;
             }
-        );*/
+        );
 
         /*Event::on(
             Dashboard::class,
