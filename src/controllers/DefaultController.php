@@ -127,6 +127,7 @@ class DefaultController extends Controller
 		$this->requirePostRequest();
 
 		$request = Craft::$app->getRequest();
+		$sendEmail = false;
 		
 		$reviewId = $request->getBodyParam('reviewId');
 		if ($reviewId) {
@@ -139,8 +140,15 @@ class DefaultController extends Controller
 			$review = new Review();
 		}
 
+		$reply = $request->getBodyParam('reply');
+
+		if($reply && ($review->reply != $reply)) {
+			$sendEmail = true;
+		}
+
 		$review->feedback = $request->getBodyParam('feedback', $review->feedback);
-		$review->reply = $request->getBodyParam('reply', $review->reply);
+		// $review->reply = $request->getBodyParam('reply', $review->reply);
+		$review->reply = $reply ? $reply : $review->reply;
 		$review->rating = $request->getBodyParam('rating', $review->rating);
 		$review->email = $request->getBodyParam('email', $review->email);
 		$review->firstName = $request->getBodyParam('firstName', $review->firstName);
@@ -182,6 +190,10 @@ class DefaultController extends Controller
 			
 			return null;
 		}
+
+		if($sendEmail && $review->getEmail()) {
+			Reviews::$plugin->service->sendEmail($review);
+		}	
 
 		Craft::$app->getSession()->setNotice(Craft::t('reviews', 'Review saved.'));
 

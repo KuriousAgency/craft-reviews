@@ -1,0 +1,24 @@
+{# @var craft \craft\web\twig\variables\CraftVariable #}
+{#
+/**
+ * Reviews plugin for Craft CMS 3.x
+ *
+ * Reviews settings.twig
+ *
+ * @author    Kurious Agency
+ * @copyright Copyright (c) 2018 Kurious Agency
+ * @link      kurious.agency
+ * @package   Reviews
+ * @since     1.0.0
+ */
+#}
+
+{% import "_includes/forms" as forms %}
+
+{{ forms.textField({
+    label: 'Email Template Path',
+    instructions: 'Please enter your email template path',
+    id: 'templatePath',
+    name: 'templatePath',
+    value: settings['templatePath']})
+}}

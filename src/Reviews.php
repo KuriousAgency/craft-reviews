@@ -16,6 +16,7 @@ use kuriousagency\reviews\fields\Reviews as ReviewsField;
 use kuriousagency\reviews\widgets\ReviewsWidget;
 use kuriousagency\reviews\elements\Review;
 use kuriousagency\reviews\twigextensions\ReviewsTwigExtension;
+use kuriousagency\reviews\models\Settings;
 
 use Craft;
 use craft\base\Plugin;
@@ -141,7 +142,29 @@ class Reviews extends Plugin
         );
     }
 
+
     // Protected Methods
     // =========================================================================
+
+    /**
+     * @inheritdoc
+     */
+    protected function createSettingsModel()
+    {
+        return new Settings();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function settingsHtml(): string
+    {
+        return Craft::$app->view->renderTemplate(
+            'reviews/settings',
+            [
+                'settings' => $this->getSettings()
+            ]
+        );
+    }
 
 }

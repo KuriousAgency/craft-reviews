@@ -2,7 +2,7 @@
 	"name": "kuriousagency/reviews",
 	"description": "product and store reviews",
 	"type": "craft-plugin",
-	"version": "1.0.4",
+	"version": "1.0.5",
 	"keywords": [
 		"craft",
 		"cms",
@@ -32,7 +32,7 @@
 	"extra": {
 		"name": "Reviews",
 		"handle": "reviews",
-		"hasCpSettings": false,
+		"hasCpSettings": true,
 		"hasCpSection": true,
 		"changelogUrl": "https://raw.githubusercontent.com/KuriousAgency/reviews/master/CHANGELOG.md",
 		"class": "kuriousagency\\reviews\\Reviews"
