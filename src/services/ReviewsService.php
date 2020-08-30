@@ -38,7 +38,7 @@ class ReviewsService extends Component
 	public function sendEmail($review)
     {
 
-		if($review->getEmail() != 'bob') {
+		if(!$review->getEmail()) {
 			$error = Craft::t('reviews', 'Review with ID “{id}” does not have an email address.', [
 				'id' => $review->id
 			]);
