@@ -52,17 +52,24 @@ class m200214_105435_switch_to_purchasables extends Migration
         $uniqueProductIds = array_unique(array_column($productIds,'productId'));
 
         foreach ($uniqueProductIds as $productId) {
-            $purchasable = Product::find()->id($productId)->anyStatus()->one()->defaultVariant;
-            $this->update(
-                '{{%reviews}}',
-                [
-                    'purchasableId' => $purchasable->id,
-                    'purchasableType' => get_class($purchasable)
-                ],
-                [
-                    'productId' => $productId
-                ]
-            );
+            $query = (new Query())
+                ->select(['commerce_products.defaultVariantId','elements.type'])
+                ->from('{{%commerce_products}}')
+                ->innerJoin('{{%elements}}','elements.id = commerce_products.defaultVariantId')
+                ->where(['commerce_products.id' => $productId])
+                ->one();
+            if($query) {
+                $this->update(
+                    '{{%reviews}}',
+                    [
+                        'purchasableId' => $query['defaultVariantId'],
+                        'purchasableType' => $query['type']
+                    ],
+                    [
+                        'productId' => $productId
+                    ]
+                );
+            }
         }
     }
 }
